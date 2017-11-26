@@ -1,0 +1,115 @@
+package Day1;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import jxl.Cell;
+import jxl.Sheet;
+import jxl.Workbook;
+import jxl.read.biff.BiffException;
+
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+public class OrangeHRMLogin 
+{
+	
+	public static WebDriver driver;
+	int i;
+	
+	@Test(priority = 1)
+	public void adminlogin(String Username, String password) throws InterruptedException, Exception
+	{   
+		File file = new File("C:\\Users\\vaidyat1\\Downloads\\chromedriver.exe");
+		System.setProperty("webdriver.chrome.driver", file.getAbsolutePath());
+    driver = new ChromeDriver();
+   
+	driver.manage().window().maximize();
+	
+	driver.get("http://opensource.demo.orangehrmlive.com/index.php/auth/login");
+	driver.findElement(By.name("txtUsername")).sendKeys(Username);
+	driver.findElement(By.name("txtPassword")).sendKeys(password);
+	driver.findElement(By.name("Submit")).click();
+	
+	driver.getCurrentUrl();
+	
+	Assert.assertTrue(driver.getCurrentUrl().contains("dashboard"),"user is not able to login- Invalid input");
+	System.out.println("Login to OrangeHRM Sucessful");
+    
+	if(driver.getCurrentUrl().contains("dashborad"))
+	{
+		File src = new File ("C:\\Users\\vaidyat1\\Desktop\\Testdata.xlsx");
+		FileInputStream fis = new FileInputStream(src);
+		XSSFWorkbook wb = new XSSFWorkbook(fis);
+		XSSFSheet sheet1 = wb.getSheetAt(0);
+		sheet1.getRow(i).createCell(4).setCellValue("pass");
+		FileOutputStream fos = new FileOutputStream(src);
+		wb.write(fos);
+	wb.close();
+	}
+	else
+	{
+		File src = new File ("C:\\Users\\vaidyat1\\Desktop\\Testdata.xlsx");
+		FileInputStream fis = new FileInputStream(src);
+		XSSFWorkbook wb = new XSSFWorkbook(fis);
+		XSSFSheet sheet1 = wb.getSheetAt(0);
+		sheet1.getRow(i).createCell(4).setCellValue("fail");
+		FileOutputStream fos = new FileOutputStream(src);
+		wb.write(fos);
+	    wb.close();
+	}	
+	}
+	
+/*	@AfterMethod
+	public void teardown(){
+		
+		driver.quit();
+	}*/
+	
+	@Test(priority =2 )
+	public void adminLogout(){
+		
+		driver.findElement(By.linkText("Welcome Admin")).click();
+		driver.findElement(By.linkText("Logout")).click();
+		driver.close();
+	}
+	
+	
+@DataProvider (name= "testData")
+public Object[][] passData()
+{
+	Exceldataconfig config = new Exceldataconfig("C:\\Users\\vaidyat1\\Desktop\\Testdata.xlsx");
+	
+	int rows = config.getRowCount(0);
+	
+	Object[][] data = new Object[rows][2];
+	
+	for (i =1; i<rows; i++)
+	{
+		
+				data[i][0] = config.getData(0, i, 0);
+				data[i][1] = config.getData(0, i, 1);
+				
+	}
+	
+	return data;    
+}
+}
+	
+		
+		
+
+	
+
